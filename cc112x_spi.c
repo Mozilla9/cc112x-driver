@@ -136,7 +136,7 @@ rf_status_t cc112x_get_rx_status(void)
  *
  * @return      status byte
  */
-static rf_status_t cc112x_spi_cmd_strobe(const uint8_t cmd)
+rf_status_t cc112x_spi_cmd_strobe(const uint8_t cmd)
 {
     uint8_t status;
 
@@ -173,6 +173,7 @@ rf_status_t cc112x_spi_read_reg(const uint16_t addr, uint8_t * data, const uint8
     uint8_t temp_addr;
     uint8_t rc;
 
+    rc = 0;
     temp_ext  = (uint8_t)(addr >> 8);
     temp_addr = (uint8_t)(addr & 0x00FF);
 
@@ -215,6 +216,7 @@ rf_status_t cc112x_spi_write_reg(const uint16_t addr, uint8_t * data, const uint
     uint8_t temp_addr;
     uint8_t rc;
 
+    rc = 0;
     temp_ext  = (uint8_t)(addr >> 8);
     temp_addr = (uint8_t)(addr & 0x00FF);
   
