@@ -1,2 +1,2 @@
 # cc112x-driver
-TI cc112x spi driver (Well renewed code from TI exaples)
+TI cc112x spi driver (Well formed code from TI examples)
