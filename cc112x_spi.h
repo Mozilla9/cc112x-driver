@@ -288,7 +288,7 @@ extern void cc112x_spi_select_chip(void);
 extern void cc112x_spi_deselect_chip(void);
 extern uint32_t cc112x_spi_write(const uint8_t * buf, const uint32_t len);
 extern uint32_t cc112x_spi_read(const uint8_t * buf, const uint32_t len);
-extern uint8_t cc112x_spi_write_read_byte(const uint8_t wbyte);
+extern uint8_t cc112x_spi_write_read_byte(const uint8_t byte);
 
 
 /**
@@ -301,6 +301,12 @@ rf_status_t cc112x_get_tx_status(void);
  *
  */
 rf_status_t cc112x_get_rx_status(void);
+
+
+/**
+ *
+ */
+rf_status_t cc112x_spi_cmd_strobe(const uint8_t cmd);
 
 
 /**

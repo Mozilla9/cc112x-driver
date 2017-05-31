@@ -54,7 +54,6 @@
 
 static rf_status_t trx_8b_reg_access(const uint8_t access_type, const uint8_t addr_byte, uint8_t * data, const uint16_t len);
 static rf_status_t trx_16b_reg_access(const uint8_t access_type, const uint8_t ext_addr, const uint8_t reg_addr, uint8_t * data, const uint8_t len);
-static rf_status_t trx_spi_cmd_strobe(const uint8_t cmd);
 static void trx_read_write_burst_single(const uint8_t addr, uint8_t * data, const uint16_t len);
 
 
@@ -85,7 +84,7 @@ static void trx_read_write_burst_single(const uint8_t addr, uint8_t * data, cons
  */
 rf_status_t cc112x_get_tx_status(void)
 {
-    return trx_spi_cmd_strobe(CC112X_SNOP);
+    return cc112x_spi_cmd_strobe(CC112X_SNOP);
 }
 
 
@@ -118,7 +117,36 @@ rf_status_t cc112x_get_tx_status(void)
  */
 rf_status_t cc112x_get_rx_status(void)
 {
-    return trx_spi_cmd_strobe(CC112X_SNOP|RADIO_READ_ACCESS);
+    return cc112x_spi_cmd_strobe(CC112X_SNOP|RADIO_READ_ACCESS);
+}
+
+
+/*******************************************************************************
+ * @fn          cc112x_spi_cmd_strobe
+ *
+ * @brief       Send command strobe to the radio. Returns status byte read
+ *              during transfer of command strobe. Validation of provided
+ *              is not done. Function assumes chip is ready.
+ *
+ * input parameters
+ *
+ * @param       cmd - command strobe
+ *
+ * output parameters
+ *
+ * @return      status byte
+ */
+static rf_status_t cc112x_spi_cmd_strobe(const uint8_t cmd)
+{
+    uint8_t status;
+
+    cc112x_spi_select_chip();
+
+    status = cc112x_spi_write_read_byte(cmd);
+
+    cc112x_spi_deselect_chip();
+
+    return status;
 }
 
 
@@ -312,35 +340,6 @@ static rf_status_t trx_16b_reg_access(const uint8_t access_type, const uint8_t e
     status = cc112x_spi_write_read_byte(access_type|ext_addr);
     cc112x_spi_write(&reg_addr, 1);
     trx_read_write_burst_single(access_type|ext_addr, data, len);
-
-    cc112x_spi_deselect_chip();
-
-    return status;
-}
-
-
-/*******************************************************************************
- * @fn          trx_spi_cmd_strobe
- *
- * @brief       Send command strobe to the radio. Returns status byte read
- *              during transfer of command strobe. Validation of provided
- *              is not done. Function assumes chip is ready.
- *
- * input parameters
- *
- * @param       cmd - command strobe
- *
- * output parameters
- *
- * @return      status byte
- */
-static rf_status_t trx_spi_cmd_strobe(const uint8_t cmd)
-{
-    uint8_t status;
-
-    cc112x_spi_select_chip();
-
-    status = cc112x_spi_write_read_byte(cmd);
 
     cc112x_spi_deselect_chip();
 
