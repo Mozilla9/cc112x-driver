@@ -46,6 +46,12 @@ extern "C" {
 #include <stdbool.h>
 
 
+/* Part numbers */
+#define CC1121x_CC1121                  0x40
+#define CC1121x_CC1120                  0x48
+#define CC1121x_CC1125                  0x58
+#define CC1121x_CC1175                  0x5A
+
 
 /* Configuration registers */
 #define CC112X_IOCFG3                   0x0000
