@@ -146,6 +146,10 @@ rf_status_t cc112x_spi_cmd_strobe(const uint8_t cmd)
 
     cc112x_spi_deselect_chip();
 
+#if CC1121x_DEBUG == 1
+    cc112x_debug(RF_WRITE_CMD, cmd, status);
+#endif
+
     return status;
 }
 
@@ -177,17 +181,22 @@ rf_status_t cc112x_spi_read_reg(const uint16_t addr, uint8_t * data, const uint8
     temp_ext  = (uint8_t)(addr >> 8);
     temp_addr = (uint8_t)(addr & 0x00FF);
 
-    /* Checking if this is a FIFO access -> returns chip not ready  */
+    /* Checking if this is a FIFO access -> returns chip not ready */
     if (CC112X_SINGLE_TXFIFO <= temp_addr && !temp_ext) {
-        return STATUS_CHIP_RDYn_BM;
+        rc = STATUS_CHIP_RDYn_BM;
+    } else {
+
+        /* Decide what register space is accessed */
+        if (!temp_ext) {
+            rc = trx_8b_reg_access(RADIO_BURST_ACCESS|RADIO_READ_ACCESS, temp_addr, data, len);
+        } else if (temp_ext == 0x2F) {
+            rc = trx_16b_reg_access(RADIO_BURST_ACCESS|RADIO_READ_ACCESS, temp_ext, temp_addr, data, len);
+        }
     }
 
-    /* Decide what register space is accessed */
-    if (!temp_ext) {
-        rc = trx_8b_reg_access(RADIO_BURST_ACCESS|RADIO_READ_ACCESS, temp_addr, data, len);
-    } else if (temp_ext == 0x2F) {
-        rc = trx_16b_reg_access(RADIO_BURST_ACCESS|RADIO_READ_ACCESS, temp_ext, temp_addr, data, len);
-    }
+#if CC1121x_DEBUG == 1
+    cc112x_debug(!temp_ext ? RF_READ_REG_8B : RF_READ_REG_16B, RADIO_BURST_ACCESS|RADIO_READ_ACCESS, rc);
+#endif
 
     return rc;
 }
@@ -222,15 +231,19 @@ rf_status_t cc112x_spi_write_reg(const uint16_t addr, uint8_t * data, const uint
   
     /* Checking if this is a FIFO access - returns chip not ready */
     if (CC112X_SINGLE_TXFIFO <= temp_addr && !temp_ext) {
-        return STATUS_CHIP_RDYn_BM;
+        rc = STATUS_CHIP_RDYn_BM;
+    } else {
+        /* Decide what register space is accessed */
+        if (!temp_ext) {
+            rc = trx_8b_reg_access(RADIO_BURST_ACCESS|RADIO_WRITE_ACCESS, temp_addr, data, len);
+        } else if (temp_ext == 0x2F) {
+            rc = trx_16b_reg_access(RADIO_BURST_ACCESS|RADIO_WRITE_ACCESS, temp_ext, temp_addr, data, len);
+        }
     }
 
-    /* Decide what register space is accessed */
-    if (!temp_ext) {
-        rc = trx_8b_reg_access(RADIO_BURST_ACCESS|RADIO_WRITE_ACCESS, temp_addr, data,len);
-    } else if (temp_ext == 0x2F) {
-        rc = trx_16b_reg_access(RADIO_BURST_ACCESS|RADIO_WRITE_ACCESS, temp_ext, temp_addr, data,len);
-    }
+#if CC1121x_DEBUG == 1
+    cc112x_debug(!temp_ext ? RF_WRITE_REG_8B : RF_WRITE_REG_16B, RADIO_BURST_ACCESS|RADIO_WRITE_ACCESS, rc);
+#endif
 
     return rc;
 }

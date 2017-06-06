@@ -46,6 +46,11 @@ extern "C" {
 #include <stdbool.h>
 
 
+#ifndef CC1121x_DEBUG
+#define CC1121x_DEBUG         0
+#endif /* CC1121x_DEBUG */
+
+
 /* Part numbers */
 #define CC1121x_CC1121                  0x40
 #define CC1121x_CC1120                  0x48
@@ -251,18 +256,18 @@ extern "C" {
 /* Command strobe registers */
 #define CC112X_SRES                     0x30      /*  SRES    - Reset chip. */
 #define CC112X_SFSTXON                  0x31      /*  SFSTXON - Enable and calibrate frequency synthesizer. */
-#define CC112X_SXOFF                    0x32      /*  SXOFF   - Turn off crystal oscillator. */
+#define CC112X_SXOFF                    0x32      /*  SXOFF   - Turn off crystal oscillator when CSn is de-asserted. */
 #define CC112X_SCAL                     0x33      /*  SCAL    - Calibrate frequency synthesizer and turn it off. */
 #define CC112X_SRX                      0x34      /*  SRX     - Enable RX. Perform calibration if enabled. */
 #define CC112X_STX                      0x35      /*  STX     - Enable TX. If in RX state, only enable TX if CCA passes. */
 #define CC112X_SIDLE                    0x36      /*  SIDLE   - Exit RX / TX, turn off frequency synthesizer. */
+#define CC112X_AFC                      0x37      /*  AFC     - Automatic Frequency Correction */
 #define CC112X_SWOR                     0x38      /*  SWOR    - Start automatic RX polling sequence (Wake-on-Radio) */
 #define CC112X_SPWD                     0x39      /*  SPWD    - Enter power down mode when CSn goes high. */
 #define CC112X_SFRX                     0x3A      /*  SFRX    - Flush the RX FIFO buffer. */
 #define CC112X_SFTX                     0x3B      /*  SFTX    - Flush the TX FIFO buffer. */
-#define CC112X_SWORRST                  0x3C      /*  SWORRST - Reset real time clock. */
+#define CC112X_SWORRST                  0x3C      /*  SWORRST - Reset the eWOR timer to the Event1 value. */
 #define CC112X_SNOP                     0x3D      /*  SNOP    - No operation. Returns status byte. */
-#define CC112X_AFC                      0x37      /*  AFC     - Automatic Frequency Correction */
 
 /* Chip states returned in status byte */
 #define CC112X_STATE_IDLE               0x00
@@ -275,13 +280,23 @@ extern "C" {
 #define CC112X_STATE_TXFIFO_ERROR       0x70
 
 
+typedef enum {
+
+    RF_WRITE_CMD = 0,
+    RF_READ_REG_8B,
+    RF_READ_REG_16B,
+    RF_WRITE_REG_8B,
+    RF_WRITE_REG_16B,
+
+} rf_debug_t;
+
 
 typedef struct {
 
   uint16_t addr;
   uint8_t data;
 
-} register_setting_t;
+} rf_register_setting_t;
 
 typedef uint8_t rf_status_t;
 
@@ -295,6 +310,8 @@ extern void cc112x_spi_deselect_chip(void);
 extern uint32_t cc112x_spi_write(const uint8_t * buf, const uint32_t len);
 extern uint32_t cc112x_spi_read(const uint8_t * buf, const uint32_t len);
 extern uint8_t cc112x_spi_write_read_byte(const uint8_t byte);
+extern void cc112x_debug(const rf_debug_t debug, const uint8_t data, const rf_status_t status);
+
 
 
 /**
