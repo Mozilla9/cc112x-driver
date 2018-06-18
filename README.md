@@ -5,9 +5,9 @@ TI cc112x spi driver (Well formed code from TI examples)
 
 1. Add `#include "cc112x_spi.h"` in your code
 
-2. Define `CC1121x_DEBUG` macros is debug needed
+2. Define `CC1121x_DEBUG` macros if you need to debug support
 
-2. Implement extern functions of spi interface in your code
+2. Implement extern functions of spi interface in your code (board impl)
 
 ```
 extern void cc112x_spi_select_chip(void);
